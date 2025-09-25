@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter @website-checker/database prisma:generate
+
       - name: Lint
         run: pnpm lint
 
@@ -35,3 +38,11 @@ jobs:
 
       - name: Test
         run: pnpm test
+        env:
+          DATABASE_URL: postgresql://localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+          STRIPE_API_KEY: sk_test_fake_key_for_testing
+          SENTRY_DSN: https://fake@sentry.io/123
+          NEXTAUTH_SECRET: test-secret-that-is-32-chars-long
+          NEXTAUTH_URL: http://localhost:3000
+          NODE_ENV: test
