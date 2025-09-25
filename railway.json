@@ -3,11 +3,7 @@
   "build": {
     "builder": "NIXPACKS",
     "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @website-checker/database prisma:generate && pnpm --filter @website-checker/worker build",
-    "watchPatterns": [
-      "apps/worker/**",
-      "packages/**",
-      "pnpm-lock.yaml"
-    ]
+    "watchPatterns": ["apps/worker/**", "packages/**", "pnpm-lock.yaml"]
   },
   "deploy": {
     "runtime": "NODE",

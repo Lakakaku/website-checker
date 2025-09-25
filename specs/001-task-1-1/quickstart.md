@@ -35,6 +35,7 @@ node --version  # Should show v20.x.x
 ```
 
 **Expected Result**:
+
 - All dependencies installed across monorepo workspaces
 - No installation errors
 - `node_modules` created in root and each workspace
@@ -68,6 +69,7 @@ NODE_ENV="development"
 ```
 
 **Validation**:
+
 ```bash
 # Test environment validation
 pnpm --filter @website-checker/config test:env
@@ -76,6 +78,7 @@ pnpm --filter @website-checker/config test:env
 ```
 
 **Expected Result**:
+
 - `.env.local` file created and filled with valid credentials
 - Environment validation passes
 - File is gitignored (verify with `git status`)
@@ -98,6 +101,7 @@ pnpm --filter @website-checker/web test:db-connection
 ```
 
 **Expected Result**:
+
 - Prisma client generated in `node_modules/.prisma/client`
 - Migrations applied to Railway PostgreSQL database
 - Connection test passes with message: "✓ Database connected successfully"
@@ -119,6 +123,7 @@ pnpm --filter @website-checker/worker dev     # Worker service
 ```
 
 **Expected Result**:
+
 - Next.js dev server running on `http://localhost:3000`
 - Worker service running and connected to Redis
 - Terminal shows:
@@ -129,6 +134,7 @@ pnpm --filter @website-checker/worker dev     # Worker service
   ```
 
 **Validation**:
+
 ```bash
 # In a new terminal, test health endpoint
 curl http://localhost:3000/api/health
@@ -163,12 +169,14 @@ pnpm format
 ```
 
 **Expected Result**:
+
 - Lint passes with no errors (0 problems)
 - Type check passes with no errors
 - Formatting check passes (or auto-fixed)
 - All commands execute in <30 seconds
 
 **Test Pre-commit Hook**:
+
 ```bash
 # Create a test commit with intentional error
 echo "const x = 'test'" > test-file.ts
@@ -199,6 +207,7 @@ pnpm test:watch
 ```
 
 **Expected Result**:
+
 - All contract tests pass (environment, database, quality gates)
 - Test coverage reports generated
 - No failing tests
@@ -221,6 +230,7 @@ pnpm --filter @website-checker/web test:sentry
 ```
 
 **Manual Verification**:
+
 1. Open Sentry dashboard
 2. Check for test error event
 3. Verify environment tag is "development"
@@ -250,6 +260,7 @@ git push origin test/deployment-verification
 ```
 
 **Cleanup**:
+
 ```bash
 git checkout main
 git branch -D test/deployment-verification
@@ -265,6 +276,7 @@ git push origin --delete test/deployment-verification
 Mark each item as you complete it:
 
 ### Environment Setup
+
 - [ ] Node.js 20 LTS installed and verified
 - [ ] pnpm 8+ installed and verified
 - [ ] Dependencies installed without errors
@@ -272,6 +284,7 @@ Mark each item as you complete it:
 - [ ] Environment validation passes
 
 ### Database & Infrastructure
+
 - [ ] Prisma client generated
 - [ ] Database migrations applied
 - [ ] Database connection test passes
@@ -279,12 +292,14 @@ Mark each item as you complete it:
 - [ ] Health endpoint returns 200 OK
 
 ### Development Workflow
+
 - [ ] Next.js dev server starts on :3000
 - [ ] Worker service starts and connects to Redis
 - [ ] Hot reload works (test by editing a file)
 - [ ] Browser shows Next.js welcome page
 
 ### Code Quality
+
 - [ ] ESLint runs without errors
 - [ ] TypeScript type checking passes
 - [ ] Prettier formatting check passes
@@ -292,17 +307,20 @@ Mark each item as you complete it:
 - [ ] All quality checks complete in <30 seconds
 
 ### Testing
+
 - [ ] Test suite runs successfully
 - [ ] All contract tests pass
 - [ ] Test coverage reports generated
 - [ ] Tests complete in <2 minutes
 
 ### Monitoring
+
 - [ ] Sentry test error captured
 - [ ] Error visible in Sentry dashboard
 - [ ] Environment tag correct (development)
 
 ### Total Time: ~30 minutes
+
 As required by FR-003: "System MUST document the setup process in a way that allows a new developer to become productive within one hour"
 
 ---
@@ -310,9 +328,11 @@ As required by FR-003: "System MUST document the setup process in a way that all
 ## Troubleshooting
 
 ### "Database connection failed"
+
 **Cause**: Invalid `DATABASE_URL` or Railway database offline
 
 **Solution**:
+
 1. Verify `DATABASE_URL` in `.env.local` matches Railway dashboard
 2. Check Railway database status in Railway dashboard
 3. Test connection manually: `pnpm --filter @website-checker/database prisma studio`
@@ -320,9 +340,11 @@ As required by FR-003: "System MUST document the setup process in a way that all
 ---
 
 ### "Pre-commit hook not blocking commits"
+
 **Cause**: Husky not installed properly
 
 **Solution**:
+
 ```bash
 pnpm husky install
 git config core.hooksPath .husky
@@ -331,9 +353,11 @@ git config core.hooksPath .husky
 ---
 
 ### "TypeScript errors in node_modules"
+
 **Cause**: Stale Prisma client or missing types
 
 **Solution**:
+
 ```bash
 pnpm --filter @website-checker/database prisma:generate
 pnpm install
@@ -342,9 +366,11 @@ pnpm install
 ---
 
 ### "Port 3000 already in use"
+
 **Cause**: Another process using port 3000
 
 **Solution**:
+
 ```bash
 # Find and kill process on port 3000
 lsof -ti:3000 | xargs kill -9
@@ -356,9 +382,11 @@ PORT=3001 pnpm dev
 ---
 
 ### "Sentry error not captured"
+
 **Cause**: Invalid `SENTRY_DSN` or development environment filtered
 
 **Solution**:
+
 1. Verify `SENTRY_DSN` in `.env.local`
 2. Check Sentry project settings for DSN
 3. Development errors may be filtered - check `beforeSend` hook
@@ -402,4 +430,4 @@ After completing this quickstart:
 
 ---
 
-*For issues or questions, create a GitHub issue or contact the team lead.*
+_For issues or questions, create a GitHub issue or contact the team lead._

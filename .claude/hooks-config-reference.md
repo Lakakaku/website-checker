@@ -6,6 +6,7 @@ Once the project is initialized with package.json, add these to your Claude Code
 ## Recommended Hooks
 
 ### Post-Edit Hook (After file modifications)
+
 Runs type checking and linting after editing TypeScript/React files.
 
 ```json
@@ -19,6 +20,7 @@ Runs type checking and linting after editing TypeScript/React files.
 ```
 
 ### Pre-Commit Hook (Before git commits)
+
 Ensures code builds and passes tests before committing.
 
 ```json
@@ -31,6 +33,7 @@ Ensures code builds and passes tests before committing.
 ```
 
 ### Post-Install Hook (After npm install)
+
 Generates Prisma client after dependency installation.
 
 ```json
@@ -43,6 +46,7 @@ Generates Prisma client after dependency installation.
 ```
 
 ### Pre-Deploy Hook (Before deployment)
+
 Comprehensive validation before deploying.
 
 ```json

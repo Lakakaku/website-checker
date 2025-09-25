@@ -15,10 +15,11 @@ This document defines the configuration entities and their relationships for the
 **Description**: Represents environment-specific settings that differ between local development, staging, and production environments.
 
 **Attributes**:
+
 - `environment`: string - Environment name (development | staging | production)
 - `DATABASE_URL`: string - Railway PostgreSQL connection string
 - `REDIS_URL`: string - Railway Redis connection string
-- `STRIPE_API_KEY`: string - Stripe API key (sk_test_* for staging, sk_live_* for production)
+- `STRIPE_API_KEY`: string - Stripe API key (sk*test*_ for staging, sk*live*_ for production)
 - `SENTRY_DSN`: string - Sentry project DSN for error tracking
 - `NEXTAUTH_SECRET`: string - 32-character random secret for session encryption
 - `NEXTAUTH_URL`: string - Application base URL (http://localhost:3000 | https://staging.website-checker.com | https://website-checker.com)
@@ -26,6 +27,7 @@ This document defines the configuration entities and their relationships for the
 - `VERCEL_ENV`: string? - Vercel-specific environment variable (preview | production)
 
 **Validation Rules** (Zod schema):
+
 ```typescript
 - DATABASE_URL: Must start with postgresql:// or postgres://
 - REDIS_URL: Must start with redis:// or rediss://
@@ -41,10 +43,12 @@ This document defines the configuration entities and their relationships for the
 **State Transitions**: N/A (configuration is stateless)
 
 **Relationships**:
+
 - Has many Deployment events
 - Validates against Infrastructure Resources (database, Redis must be reachable)
 
 **Files Affected**:
+
 - `.env.local` (development)
 - `.env.example` (template)
 - Vercel environment variables (staging, production)
@@ -57,6 +61,7 @@ This document defines the configuration entities and their relationships for the
 **Description**: Represents external services the application depends on with their connection parameters and health status.
 
 **Attributes**:
+
 - `name`: string - Resource name (postgresql | redis | vercel | railway | sentry)
 - `type`: enum - Resource type (database | cache | hosting | monitoring)
 - `provider`: string - Service provider (Railway | Vercel | Sentry)
@@ -67,6 +72,7 @@ This document defines the configuration entities and their relationships for the
 - `lastChecked`: timestamp - Last health check time
 
 **Validation Rules**:
+
 ```typescript
 - name: Must be unique per environment
 - connectionString: Required for database and cache types
@@ -76,6 +82,7 @@ This document defines the configuration entities and their relationships for the
 ```
 
 **State Transitions**:
+
 ```
 healthy → degraded: Latency >500ms or error rate >1%
 degraded → unavailable: Connection failure
@@ -83,10 +90,12 @@ unavailable → healthy: Successful health check
 ```
 
 **Relationships**:
+
 - Referenced by Environment Configuration
 - Generates Error Events when status changes to degraded/unavailable
 
 **Files Affected**:
+
 - `apps/web/src/lib/infra-health.ts` (health check utilities)
 - `apps/worker/src/lib/infra-health.ts` (worker health checks)
 
@@ -97,6 +106,7 @@ unavailable → healthy: Successful health check
 **Description**: Represents standards and checks that code must pass before commits are accepted.
 
 **Attributes**:
+
 - `ruleId`: string - Unique rule identifier (e.g., @typescript-eslint/no-explicit-any)
 - `category`: enum - Rule category (formatting | linting | typecheck | testing)
 - `severity`: enum - Enforcement level (error | warning | off)
@@ -105,6 +115,7 @@ unavailable → healthy: Successful health check
 - `configuration`: object - Rule-specific configuration
 
 **Validation Rules**:
+
 ```typescript
 - ruleId: Must match pattern /^[@a-z-/]+$/
 - category: Must be one of allowed categories
@@ -115,10 +126,12 @@ unavailable → healthy: Successful health check
 **State Transitions**: N/A (rules are configuration)
 
 **Relationships**:
+
 - Applied by Pre-commit Hook during commit process
 - Generates feedback in Deployment events (CI checks)
 
 **Files Affected**:
+
 - `packages/config/src/eslint/base.js`
 - `packages/config/src/eslint/nextjs.js`
 - `packages/config/src/eslint/node.js`
@@ -132,6 +145,7 @@ unavailable → healthy: Successful health check
 **Description**: Represents a single deployment event with metadata, status, and associated logs.
 
 **Attributes**:
+
 - `id`: string - Unique deployment identifier
 - `environment`: enum - Target environment (staging | production)
 - `branch`: string - Git branch (develop | main)
@@ -148,6 +162,7 @@ unavailable → healthy: Successful health check
 - `triggeredBy`: string - User or automation that triggered deployment
 
 **Validation Rules**:
+
 ```typescript
 - branch: Must be 'develop' or 'main' (FR-010)
 - environment: Must match branch (develop → staging, main → production)
@@ -157,6 +172,7 @@ unavailable → healthy: Successful health check
 ```
 
 **State Transitions**:
+
 ```
 pending → building: Build started
 building → deploying: Build succeeded, deployment starting
@@ -166,11 +182,13 @@ building → failed: Build failed (compilation, tests, etc.)
 ```
 
 **Relationships**:
+
 - Belongs to Environment Configuration
 - Can generate Error Events if deployment fails
 - Validated against Code Quality Rules during build
 
 **Files Affected**:
+
 - `.github/workflows/deploy.yml`
 - `vercel.json`
 - `railway.json` (Railway config)
@@ -182,6 +200,7 @@ building → failed: Build failed (compilation, tests, etc.)
 **Description**: Represents a captured application error with context, severity, and environment information.
 
 **Attributes**:
+
 - `id`: string - Unique error identifier
 - `environment`: enum - Environment where error occurred (development | staging | production)
 - `severity`: enum - Error severity (fatal | error | warning | info)
@@ -198,6 +217,7 @@ building → failed: Build failed (compilation, tests, etc.)
 - `alertSent`: boolean - Whether alert was sent to team (FR-019)
 
 **Validation Rules**:
+
 ```typescript
 - environment: Must match current deployment environment
 - severity: Must be one of allowed values
@@ -208,17 +228,20 @@ building → failed: Build failed (compilation, tests, etc.)
 ```
 
 **State Transitions**:
+
 ```
 unresolved → resolved: Developer marks as fixed
 resolved → unresolved: Error recurs
 ```
 
 **Relationships**:
+
 - Belongs to Environment Configuration
 - May be related to Deployment (errors during/after deployment)
 - May be related to Infrastructure Resource (infra-related errors)
 
 **Files Affected**:
+
 - `apps/web/src/lib/sentry.ts` (Sentry initialization)
 - `apps/worker/src/lib/sentry.ts` (Worker Sentry config)
 - Sentry dashboard (external)
@@ -248,6 +271,7 @@ graph TD
 ## Configuration File Structure
 
 ### Root Configuration
+
 ```
 .env.example                    # Template (committed)
 .env.local                      # Development overrides (gitignored)
@@ -255,6 +279,7 @@ graph TD
 ```
 
 ### Shared Configuration Package
+
 ```
 packages/config/
 ├── src/
@@ -272,6 +297,7 @@ packages/config/
 ```
 
 ### Deployment Configuration
+
 ```
 .github/workflows/
 ├── ci.yml                      # PR quality checks (Code Quality Rules)
@@ -284,6 +310,7 @@ railway.json                    # Railway configuration (worker service)
 ## Validation & Testing Strategy
 
 ### Environment Configuration Validation
+
 ```typescript
 // Test: Environment variables load correctly
 // Test: Invalid DATABASE_URL is rejected
@@ -293,6 +320,7 @@ railway.json                    # Railway configuration (worker service)
 ```
 
 ### Infrastructure Resource Health Checks
+
 ```typescript
 // Test: PostgreSQL connection succeeds
 // Test: Redis connection succeeds
@@ -302,6 +330,7 @@ railway.json                    # Railway configuration (worker service)
 ```
 
 ### Code Quality Rule Enforcement
+
 ```typescript
 // Test: Pre-commit hook blocks commit with linting errors (FR-013)
 // Test: Pre-commit hook blocks commit with formatting errors (FR-013)
@@ -311,6 +340,7 @@ railway.json                    # Railway configuration (worker service)
 ```
 
 ### Deployment Validation
+
 ```typescript
 // Test: Deployment triggered on push to main branch
 // Test: Deployment triggered on push to develop branch
@@ -321,6 +351,7 @@ railway.json                    # Railway configuration (worker service)
 ```
 
 ### Error Event Capture
+
 ```typescript
 // Test: Production error sends immediate alert (FR-019)
 // Test: Staging error does not send alert

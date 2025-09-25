@@ -4,6 +4,7 @@
 **Prerequisites**: plan.md ✅, research.md ✅, data-model.md ✅, contracts/ ✅ (4 files)
 
 ## Execution Flow (main)
+
 ```
 1. Load plan.md from feature directory
    → ✅ Loaded: Turborepo + pnpm monorepo with Next.js 14 + TypeScript
@@ -32,6 +33,7 @@
 ```
 
 ## Format: `[ID] [P?] Description`
+
 - **[P]**: Can run in parallel (different files, no dependencies)
 - File paths are absolute from repository root
 - Monorepo structure: `apps/web/`, `apps/worker/`, `packages/*/`
@@ -42,7 +44,7 @@
 
 - [x] **T001** Initialize Git repository with main and develop branches
   - Files: `.git/`, `.gitignore`
-  - Actions: `git init`, create `.gitignore` (node_modules, .env.*, .next, dist)
+  - Actions: `git init`, create `.gitignore` (node_modules, .env.\*, .next, dist)
   - Validation: `git status` shows clean working directory
 
 - [x] **T002** Initialize pnpm workspace monorepo structure
@@ -485,6 +487,7 @@
 ## Dependencies
 
 ### Critical Path (Must Complete in Order)
+
 ```
 T001 (Git init)
   → T002 (pnpm workspace)
@@ -525,32 +528,41 @@ T001 (Git init)
 ### Parallel Execution Groups
 
 **Group A** (After T002): Workspace initialization
+
 - T003, T004, T005, T006, T007 can run simultaneously (different package.json files)
 
 **Group B** (After T009/T012): App-specific configs
+
 - T010, T011 (TypeScript configs)
 - T013, T014 (ESLint configs)
 
 **Group C** (After T017/T018): Contract tests
+
 - T019, T020, T021, T022 can run simultaneously (different test files, must all fail)
 
 **Group D** (After T023): Environment loaders
+
 - T024, T025, T026 (env.example, web env, worker env)
 
 **Group E** (After T028): Prisma utilities
+
 - T029, T030 can start (scripts and health check independent)
 
 **Group F** (After T034): Infrastructure connections
+
 - T035, T036 (Railway DB and Redis setup)
 
 **Group G** (After T039): Deployment workflows
+
 - T040 can overlap with T041, T042, T043, T044 (GitHub workflows + monitoring + testing)
 
 **Group H** (After T045): All integration and contract validation
+
 - T046, T047, T048, T049 (contract validations)
 - T050, T051, T052, T053, T054 (quickstart validations)
 
 **Group I** (After T054): Final documentation
+
 - T055, T056 (README and quickstart validation)
 
 ---
@@ -558,6 +570,7 @@ T001 (Git init)
 ## Parallel Execution Examples
 
 ### Example 1: Initialize All Workspaces (Group A)
+
 ```bash
 # After T002 completes, launch these in parallel:
 pnpm create next-app@latest apps/web --typescript --tailwind --app --no-src-dir --import-alias "@/*" &
@@ -569,6 +582,7 @@ wait
 ```
 
 ### Example 2: Write All Contract Tests (Group C)
+
 ```bash
 # After T017/T018 complete, write all contract tests in parallel:
 # All these tasks create different test files and can run simultaneously
@@ -605,6 +619,7 @@ EOF
 ```
 
 ### Example 3: Infrastructure Integration (Group F + G)
+
 ```bash
 # After T034 completes:
 
@@ -622,6 +637,7 @@ railway variables set REDIS_URL=<redis-url>
 ```
 
 ### Example 4: Final Validation (Group H)
+
 ```bash
 # After T045 completes, run all integration tests in parallel:
 pnpm --filter @website-checker/config test &        # T046 env tests
@@ -689,6 +705,7 @@ wait
 **Ready for implementation**: Execute tasks T001-T060 in order, respecting dependencies and parallel opportunities.
 
 **Suggested workflow**:
+
 1. Complete T001-T018 (setup) sequentially or in parallel groups
 2. **CRITICAL**: Complete T019-T022 and verify all tests FAIL
 3. Implement T023-T045 to make tests pass

@@ -1,0 +1,4 @@
+
+> @website-checker/types@0.1.0 typecheck /Users/lucasjenner/checker/packages/types
+> tsc --noEmit
+

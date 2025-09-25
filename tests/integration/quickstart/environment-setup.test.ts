@@ -21,10 +21,10 @@ describe('Quickstart Scenario 2: Environment Setup', () => {
       'STRIPE_API_KEY',
       'NEXTAUTH_SECRET',
       'NEXTAUTH_URL',
-      'SENTRY_DSN'
+      'SENTRY_DSN',
     ];
 
-    requiredVars.forEach(varName => {
+    requiredVars.forEach((varName) => {
       expect(envExample).toContain(varName);
     });
   });

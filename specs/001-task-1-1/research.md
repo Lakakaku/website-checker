@@ -15,6 +15,7 @@ This document consolidates research findings and technical decisions for establi
 **Decision**: Turborepo + pnpm workspaces
 
 **Rationale**:
+
 - Turborepo provides intelligent caching and parallel execution for builds/tests
 - pnpm workspaces offer efficient disk usage (30-50% smaller than npm/yarn)
 - Native support for Next.js, TypeScript, and shared packages
@@ -22,11 +23,13 @@ This document consolidates research findings and technical decisions for establi
 - Constitutional alignment: Enables shared types/config packages reducing duplication
 
 **Alternatives Considered**:
+
 - **Nx**: More features but higher complexity, overkill for initial setup
 - **Lerna**: Less active development, no built-in caching
 - **Yarn Workspaces**: Slower than pnpm, no intelligent caching like Turborepo
 
 **Implementation Notes**:
+
 - Root `turbo.json` defines pipeline dependencies
 - Shared `packages/config` for ESLint, TypeScript, Tailwind configs
 - Shared `packages/types` for type definitions across apps
@@ -39,6 +42,7 @@ This document consolidates research findings and technical decisions for establi
 **Decision**: Prisma ORM
 
 **Rationale**:
+
 - Type-safe database access with generated TypeScript types
 - Excellent Railway PostgreSQL integration
 - Migration system aligned with TDD workflow (schema → migration → tests)
@@ -46,11 +50,13 @@ This document consolidates research findings and technical decisions for establi
 - Strong Next.js 14 ecosystem support
 
 **Alternatives Considered**:
+
 - **Drizzle ORM**: Newer, less mature ecosystem, fewer Railway examples
 - **TypeORM**: More verbose decorators, weaker TypeScript inference
 - **Kysely**: SQL-first approach less suitable for rapid iteration
 
 **Implementation Notes**:
+
 - Prisma client as shared package (`packages/database`)
 - Connection pooling via Prisma Data Proxy for Vercel Edge
 - Separate migration files for Railway vs. Vercel databases if needed
@@ -62,6 +68,7 @@ This document consolidates research findings and technical decisions for establi
 **Decision**: ESLint + Prettier + TypeScript strict + Husky + lint-staged
 
 **Rationale**:
+
 - ESLint with Next.js plugin catches React/Next.js specific issues
 - Prettier ensures consistent formatting (constitutional requirement)
 - TypeScript strict mode prevents common runtime errors
@@ -69,11 +76,13 @@ This document consolidates research findings and technical decisions for establi
 - lint-staged only checks changed files (faster commits)
 
 **Alternatives Considered**:
+
 - **Biome**: Faster but less Next.js-specific rules, newer ecosystem
 - **Standard.js**: No configuration but less flexible for monorepo
 - **Lefthook**: Similar to Husky but Go-based, less TypeScript tooling
 
 **Implementation Notes**:
+
 - Shared ESLint config in `packages/config/eslint`
 - Pre-commit hook blocks commits with any violations (FR-016)
 - Separate configs for Next.js app vs. Node.js worker
@@ -86,17 +95,20 @@ This document consolidates research findings and technical decisions for establi
 **Decision**: Zod-validated environment schemas + T3 Env pattern
 
 **Rationale**:
+
 - Runtime validation prevents deployment with missing env vars (FR-011)
 - Type-safe access to environment variables throughout codebase
 - Clear error messages for misconfiguration
 - Separation of client vs. server environment variables (Next.js requirement)
 
 **Alternatives Considered**:
+
 - **dotenv-safe**: No runtime validation, JavaScript only
 - **envalid**: Less TypeScript integration, no Next.js client/server split
 - **joi**: More verbose schema syntax
 
 **Implementation Notes**:
+
 - Shared `packages/config/src/env.ts` with Zod schemas
 - Separate schemas for each environment (local, staging, production)
 - Next.js `NEXT_PUBLIC_` prefix for client-side variables
@@ -109,17 +121,20 @@ This document consolidates research findings and technical decisions for establi
 **Decision**: Vitest (unit) + Playwright (E2E) + React Testing Library (components)
 
 **Rationale**:
+
 - Vitest 5x faster than Jest with native ESM and TypeScript support
 - Playwright superior to Cypress for multi-browser testing
 - React Testing Library aligns with Next.js best practices
 - All frameworks support TDD workflow (constitutional requirement)
 
 **Alternatives Considered**:
+
 - **Jest**: Slower, requires more configuration for ESM/TypeScript
 - **Cypress**: E2E only, slower than Playwright, no Webkit support
 - **Testing Library**: No E2E capabilities
 
 **Implementation Notes**:
+
 - Vitest for unit tests with `in-source` testing option
 - Playwright for E2E tests of customer/admin portals
 - Supertest for API route contract tests
@@ -132,17 +147,20 @@ This document consolidates research findings and technical decisions for establi
 **Decision**: Vercel (frontend/API) + Railway (workers) with dual environments
 
 **Rationale**:
+
 - Vercel native Next.js 14 App Router support with edge runtime
 - Railway for long-running worker processes (Vercel 10s timeout limitation)
 - Git-based deployments align with constitutional phased implementation
 - Separate staging (develop branch) and production (main branch) per FR-010
 
 **Alternatives Considered**:
+
 - **All Vercel**: Cannot run BullMQ workers (requires long-running processes)
 - **All Railway**: More expensive for frontend, less Next.js optimization
 - **AWS/GCP**: Higher complexity, slower iteration for initial setup
 
 **Implementation Notes**:
+
 - Vercel project with preview deployments disabled (main + develop only)
 - Railway services: PostgreSQL, Redis, Worker (Node.js)
 - Environment variables synced via Railway CLI and Vercel CLI
@@ -155,17 +173,20 @@ This document consolidates research findings and technical decisions for establi
 **Decision**: Sentry with immediate alerting for production errors
 
 **Rationale**:
+
 - Native Next.js 14 integration with automatic source maps
 - Immediate Slack/email alerts for any production error (FR-019)
 - Environment separation (development, staging, production) per FR-020
 - Session replay for debugging user-reported issues
 
 **Alternatives Considered**:
+
 - **LogRocket**: More expensive, focuses on session replay vs. error tracking
 - **Rollbar**: Less Next.js ecosystem integration
 - **BugSnag**: Weaker TypeScript support
 
 **Implementation Notes**:
+
 - Sentry DSN per environment in environment variables
 - `beforeSend` hook to filter development errors from staging/prod
 - Custom tags for customer portal vs. admin panel errors
@@ -178,17 +199,20 @@ This document consolidates research findings and technical decisions for establi
 **Decision**: BullMQ + Redis on Railway
 
 **Rationale**:
+
 - BullMQ modern successor to Bull with better TypeScript support
 - Redis hosted on Railway in same project as PostgreSQL (low latency)
 - Supports complex job patterns (delays, retries, priorities) for scanning
 - Constitutional alignment: Separate concerns (web vs. workers)
 
 **Alternatives Considered**:
+
 - **Agenda**: MongoDB-based, adds complexity with second database
 - **Bee-Queue**: Simpler but lacks advanced features needed for scanning
 - **Graphile Worker**: PostgreSQL-based but higher DB load
 
 **Implementation Notes**:
+
 - Separate Railway service for worker process
 - Job definitions in `apps/worker/src/jobs`
 - Queue definitions in `apps/worker/src/queues`
@@ -212,6 +236,7 @@ Rationale: These libraries don't affect infrastructure setup and can be added in
 ## Best Practices Applied
 
 ### Next.js 14 App Router
+
 - Server components by default for better performance
 - Client components only when needed (`'use client'` directive)
 - Route groups for customer `(customer)/` and admin `(admin)/` portals
@@ -219,12 +244,14 @@ Rationale: These libraries don't affect infrastructure setup and can be added in
 - Metadata API for SEO optimization
 
 ### TypeScript Configuration
+
 - Strict mode enabled across all packages
 - Path aliases for cleaner imports (`@/components`, `@/lib`)
 - Composite projects for faster builds in monorepo
 - Project references between packages
 
 ### Security Best Practices
+
 - Environment variables never committed to Git (`.env*` in `.gitignore`)
 - Sentry filtering to prevent logging sensitive data
 - Prisma connection strings via environment variables only
@@ -232,6 +259,7 @@ Rationale: These libraries don't affect infrastructure setup and can be added in
 - CORS configuration for API routes
 
 ### Performance Optimization
+
 - Turborepo caching for faster CI/CD builds
 - pnpm for reduced disk usage and faster installs
 - Next.js automatic code splitting
@@ -243,16 +271,19 @@ Rationale: These libraries don't affect infrastructure setup and can be added in
 ## Integration Points
 
 ### Railway → Vercel
+
 - Shared PostgreSQL connection string via environment variables
 - Redis connection string for session storage
 - BullMQ job queue accessible from Next.js API routes
 
 ### GitHub → Vercel
+
 - Automatic deployments on `main` (production) and `develop` (staging) push
 - Environment variables configured in Vercel dashboard
 - Build logs visible in Vercel deployments tab
 
 ### GitHub → Railway
+
 - Automatic worker deployments on `main` branch push
 - Environment variables configured in Railway dashboard
 - Logs accessible via Railway CLI

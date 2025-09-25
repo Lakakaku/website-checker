@@ -1,0 +1,4 @@
+
+> @website-checker/worker@0.1.0 lint /Users/lucasjenner/checker/apps/worker
+> eslint src --ext .ts
+

@@ -2,18 +2,11 @@
   "mcpServers": {
     "playwright": {
       "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ]
+      "args": ["@playwright/mcp@latest"]
     },
     "serena": {
       "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/oraios/serena",
-        "serena",
-        "start-mcp-server"
-      ]
+      "args": ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server"]
     },
     "postgres": {
       "command": "npx",
@@ -25,10 +18,7 @@
     },
     "stripe": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-stripe"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-stripe"],
       "env": {
         "STRIPE_API_KEY": "your_stripe_secret_key_here"
       }

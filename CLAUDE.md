@@ -89,6 +89,7 @@ All data is stored in Railway PostgreSQL, with Redis for job queuing.
 ## Development Workflow
 
 ### Feature Development
+
 1. Specifications created via `/specify` command (stored in `specs/`)
 2. Ambiguities resolved via `/clarify` command
 3. Implementation plans via `/plan` command
@@ -96,12 +97,14 @@ All data is stored in Railway PostgreSQL, with Redis for job queuing.
 5. Follow TDD: Write tests → See fail → Implement → See pass
 
 ### Code Quality Enforcement
+
 - **Pre-commit hooks** (Husky) block commits with any quality issues (FR-016)
 - ESLint, Prettier, TypeScript strict mode all enforced
 - No warnings or errors allowed in committed code
 - Auto-fixable issues are fixed automatically
 
 ### Environment Management
+
 - `.env.local` for local development (gitignored)
 - `.env.example` template (committed)
 - Vercel dashboard for staging/production environment variables
@@ -109,6 +112,7 @@ All data is stored in Railway PostgreSQL, with Redis for job queuing.
 - Required variables: `DATABASE_URL`, `REDIS_URL`, `STRIPE_API_KEY`, `SENTRY_DSN`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`
 
 ### Deployment Strategy
+
 - **Main branch** → Vercel production deployment
 - **Develop branch** → Vercel staging deployment
 - **Feature branches** → CI checks only, no deployment
@@ -117,12 +121,14 @@ All data is stored in Railway PostgreSQL, with Redis for job queuing.
 ## Key Patterns
 
 ### Monorepo Best Practices
+
 - Use workspace protocol for internal dependencies: `"@website-checker/database": "workspace:*"`
 - Shared configs in `packages/config` (ESLint, TypeScript, Tailwind)
 - Turborepo caching for faster builds/tests
 - Path aliases: `@/components`, `@/lib`, `@/types`
 
 ### Next.js 14 App Router Patterns
+
 - Server components by default (no `'use client'` unless needed)
 - Route groups for customer `(customer)/` and admin `(admin)/` portals
 - API routes in `app/api/` for backend endpoints
@@ -130,12 +136,14 @@ All data is stored in Railway PostgreSQL, with Redis for job queuing.
 - Loading/error states with `loading.tsx` and `error.tsx`
 
 ### Database Patterns (Prisma)
+
 - Shared Prisma client via `packages/database`
 - Connection pooling for Vercel serverless functions
 - Migrations in `packages/database/prisma/migrations/`
 - Generated types available across all workspaces
 
 ### Error Handling
+
 - Sentry captures all unhandled errors
 - Immediate alerts for production errors (FR-019)
 - Environment separation (development, staging, production)
@@ -144,6 +152,7 @@ All data is stored in Railway PostgreSQL, with Redis for job queuing.
 ## Recent Changes (Last 3 Features)
 
 ### 001-task-1-1: Project Setup and Infrastructure (2025-09-25)
+
 - Initialized monorepo structure with Turborepo + pnpm workspaces
 - Configured Next.js 14 App Router with TypeScript strict mode
 - Set up Railway PostgreSQL + Redis for data and job queue

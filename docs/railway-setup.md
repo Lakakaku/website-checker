@@ -15,11 +15,13 @@
 After connecting, configure these settings in Railway:
 
 #### Service Settings:
+
 - **Service Name**: `worker`
 - **Root Directory**: Leave as `/` (we handle paths in config)
 - **Branch**: `main`
 
 #### Build & Deploy (in Settings):
+
 - **Build Command**:
   ```
   pnpm install --frozen-lockfile && pnpm --filter @website-checker/database prisma:generate && pnpm --filter @website-checker/worker build
@@ -68,11 +70,13 @@ Make sure you have these services in Railway:
 After setup, get these URLs from Railway:
 
 **From PostgreSQL service → Connect tab:**
+
 ```
 DATABASE_URL=postgresql://postgres:xxx@xxx.railway.app:5432/railway
 ```
 
 **From Redis service → Connect tab:**
+
 ```
 REDIS_URL=redis://default:xxx@xxx.railway.app:6379
 ```
@@ -88,6 +92,7 @@ Copy the DATABASE_URL and REDIS_URL to your Vercel project:
 ### 7. Deploy
 
 After configuration:
+
 1. Railway will automatically deploy when you push to `main`
 2. Check the deploy logs in Railway
 3. The worker should start and connect to PostgreSQL and Redis
@@ -103,25 +108,31 @@ Check that everything works:
 ## Troubleshooting
 
 ### "Cannot find pnpm"
+
 Add to Railway settings:
+
 ```
 NIXPACKS_NODE_VERSION=20
 NIXPACKS_PNPM_VERSION=8
 ```
 
 ### "Prisma client not found"
+
 Make sure build command includes:
+
 ```
 pnpm --filter @website-checker/database prisma:generate
 ```
 
 ### "Connection refused"
+
 - Check DATABASE_URL uses the public URL (not private)
 - Check Redis uses REDIS_PUBLIC_URL (not private)
 
 ## Next Steps
 
 1. Commit and push the Railway config files:
+
    ```bash
    git add railway.json apps/worker/railway.toml .env.railway docs/railway-setup.md
    git commit -m "chore: add Railway configuration"

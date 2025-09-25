@@ -17,9 +17,5 @@
     "sourceMap": true,
     "noEmit": true
   },
-  "exclude": [
-    "node_modules",
-    "dist",
-    ".next"
-  ]
+  "exclude": ["node_modules", "dist", ".next"]
 }
