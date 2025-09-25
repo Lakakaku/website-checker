@@ -1,0 +1,24 @@
+
+> @website-checker/database@0.1.0 test /Users/lucasjenner/checker/packages/database
+> vitest run
+
+
+ RUN  v1.6.1 /Users/lucasjenner/checker/packages/database
+
+ ❯ tests/prisma-client.test.ts  (9 tests | 8 failed) 52ms
+   ❯ tests/prisma-client.test.ts > Database Connectivity Contract > Web app connects on startup
+     → @prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.
+   ❯ tests/prisma-client.test.ts > Database Connectivity Contract > Worker shares database with web
+     → @prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.
+   ❯ tests/prisma-client.test.ts > Database Connectivity Contract > Connection failure prevents startup
+     → @prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.
+   ❯ tests/prisma-client.test.ts > Database Connectivity Contract > Credentials rotate gracefully
+     → @prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.
+   ❯ tests/prisma-client.test.ts > Database Connectivity Contract > Connection pool limits respected
+     → @prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.
+   ❯ tests/prisma-client.test.ts > Database Connectivity Contract > Local development uses DATABASE_URL
+     → @prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.
+   ❯ tests/prisma-client.test.ts > Database Connectivity Contract > Health check endpoint available
+     → @prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.
+   ❯ tests/prisma-client.test.ts > Database Connectivity Contract > Serverless functions use pooling
+     → @prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.

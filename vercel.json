@@ -1,0 +1,13 @@
+{
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@website-checker/web",
+  "devCommand": "pnpm dev",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "outputDirectory": "apps/web/.next",
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "develop": true
+    }
+  }
+}

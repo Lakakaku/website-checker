@@ -1,0 +1,177 @@
+# Contract: Database Connectivity Validation
+# Maps to: FR-004, FR-006, FR-008
+# Entity: Infrastructure Resource (PostgreSQL)
+
+name: Database Connectivity Contract
+version: 1.0.0
+description: Validates Railway PostgreSQL connectivity on application startup and ensures shared access across web and worker services
+
+scenarios:
+  - name: Web Application Connects to Database on Startup
+    given:
+      - DATABASE_URL environment variable configured
+      - Railway PostgreSQL database is running
+      - Network connectivity to Railway available
+    when:
+      - Next.js application starts
+      - Prisma client initializes
+      - Health check runs (FR-006)
+    then:
+      - Connection succeeds within 5 seconds
+      - Prisma client ready for queries
+      - Application logs "Database connected"
+      - Application proceeds to listen on port
+
+  - name: Worker Service Shares Database with Web App
+    given:
+      - Railway worker service configured
+      - Same DATABASE_URL as web application (FR-008)
+      - PostgreSQL database running
+    when:
+      - Worker service starts
+      - Prisma client initializes
+      - Connects to database
+    then:
+      - Connection succeeds
+      - Worker can read/write same tables as web app
+      - Both services see same data
+      - Connection pooling prevents conflicts
+
+  - name: Database Connection Failure Prevents Startup
+    given:
+      - DATABASE_URL points to unreachable database
+      - Application attempts to start
+    when:
+      - Prisma client attempts connection
+      - Health check runs (FR-006)
+      - Connection timeout after 5 seconds
+    then:
+      - Application exits with error code 1
+      - Error logged: "Failed to connect to database"
+      - Sentry error event created (if Sentry initialized)
+      - No HTTP server started (fail fast)
+
+  - name: Database Credentials Rotate Gracefully
+    given:
+      - Railway rotates database credentials
+      - New DATABASE_URL available in environment
+      - Application running with old connection
+    when:
+      - Railway triggers service restart
+      - Application reinitializes with new credentials
+    then:
+      - New connection established successfully
+      - Old connection closed gracefully
+      - No data loss during transition
+      - Downtime < 10 seconds
+
+  - name: Connection Pool Limits Respected
+    given:
+      - Railway PostgreSQL connection limit is 100
+      - Web application uses connection pooling
+      - Worker service uses connection pooling
+      - Both services running simultaneously
+    when:
+      - Load test generates 500 concurrent requests
+      - Workers process 50 concurrent jobs
+    then:
+      - Total active connections < 100
+      - Prisma connection pool prevents overflow
+      - Requests queue if pool exhausted
+      - No "too many connections" errors
+
+  - name: Local Development Uses Database URL
+    given:
+      - .env.local contains DATABASE_URL
+      - Points to local PostgreSQL or Railway dev database
+      - Developer runs pnpm dev
+    when:
+      - Next.js dev server starts
+      - Prisma client initializes
+    then:
+      - Connects to configured database
+      - Developer sees database connection log
+      - Hot reload preserves connection
+      - No production database accessed
+
+  - name: Prisma Migrations Run Before Deployment
+    given:
+      - New migration files in packages/database/prisma/migrations/
+      - Vercel deployment starting
+      - Railway database accessible
+    when:
+      - Vercel build runs
+      - prisma migrate deploy command executes
+    then:
+      - Migrations applied to database
+      - Schema version updated
+      - Build succeeds only if migrations succeed
+      - Application starts with correct schema
+
+  - name: Database Health Check Endpoint Available
+    given:
+      - Application running
+      - Database connected
+    when:
+      - GET request to /api/health
+    then:
+      - Response status: 200 OK
+      - Response body includes:
+        - "database": "healthy"
+        - "latency": <number in ms>
+      - Latency < 100ms for healthy status
+
+  - name: Vercel Serverless Functions Use Connection Pooling
+    given:
+      - API route handler needs database access
+      - Vercel serverless environment (10s timeout)
+      - Prisma client configured for serverless
+    when:
+      - API request invokes serverless function
+      - Function queries database
+    then:
+      - Connection reused from pool if available
+      - New connection created if pool empty
+      - Connection released after function completes
+      - No connection leaks
+
+validation_rules:
+  connection_requirements:
+    - Must connect within 5 seconds on startup
+    - Must validate connection before accepting requests
+    - Must log connection status (success/failure)
+    - Must fail fast if connection unavailable
+
+  connection_pool_limits:
+    web_app:
+      min: 2
+      max: 10
+      timeout: 5s
+
+    worker:
+      min: 1
+      max: 5
+      timeout: 10s
+
+  health_check:
+    endpoint: /api/health
+    interval: 30s
+    timeout: 5s
+    failure_threshold: 3
+
+  migration_strategy:
+    - Migrations run before application starts
+    - Migrations must be backwards compatible for zero-downtime
+    - Schema changes require review before production
+
+test_files:
+  - apps/web/tests/integration/database/connection.test.ts
+  - apps/worker/tests/integration/database/connection.test.ts
+  - packages/database/tests/prisma-client.test.ts
+  - apps/web/tests/integration/api/health.test.ts
+
+implementation_files:
+  - packages/database/src/client.ts
+  - packages/database/prisma/schema.prisma
+  - apps/web/src/app/api/health/route.ts
+  - apps/worker/src/lib/database.ts

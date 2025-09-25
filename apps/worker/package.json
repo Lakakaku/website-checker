@@ -1,0 +1,32 @@
+{
+  "name": "@website-checker/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@website-checker/database": "workspace:*",
+    "@website-checker/types": "workspace:*",
+    "bullmq": "^5.8.0",
+    "ioredis": "^5.4.1",
+    "axe-core": "^4.9.1",
+    "playwright": "^1.45.0",
+    "@sentry/node": "^8.13.0"
+  },
+  "devDependencies": {
+    "@website-checker/config": "workspace:*",
+    "@types/node": "^20.14.10",
+    "typescript": "^5.5.3",
+    "tsx": "^4.16.0",
+    "vitest": "^1.6.0",
+    "eslint": "^8.57.0"
+  }
+}

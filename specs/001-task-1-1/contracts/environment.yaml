@@ -1,0 +1,185 @@
+# Contract: Environment Configuration Validation
+# Maps to: FR-005, FR-011
+# Entity: Environment Configuration
+
+name: Environment Validation Contract
+version: 1.0.0
+description: Validates that all required environment variables are present and correctly formatted before application startup
+
+scenarios:
+  - name: Development Environment Loads Successfully
+    given:
+      - .env.local file exists
+      - All required variables present
+      - DATABASE_URL points to local PostgreSQL or Railway dev database
+      - REDIS_URL points to local Redis or Railway dev Redis
+      - STRIPE_API_KEY starts with sk_test_
+      - NEXTAUTH_SECRET is 32+ characters
+      - NODE_ENV is "development"
+    when:
+      - Application starts
+      - Environment validation runs
+    then:
+      - Validation passes
+      - Application starts successfully
+      - No error events generated
+      - Console logs environment (with secrets masked)
+
+  - name: Staging Environment Validates Against Schema
+    given:
+      - Vercel environment variables configured for staging
+      - VERCEL_ENV is "preview"
+      - DATABASE_URL points to Railway staging database
+      - REDIS_URL points to Railway staging Redis
+      - STRIPE_API_KEY starts with sk_test_
+      - NEXTAUTH_URL is https://staging.website-checker.com
+      - All required variables present
+    when:
+      - Vercel build runs on develop branch push
+      - Environment validation runs during build
+    then:
+      - Build passes environment validation
+      - Deployment proceeds
+      - Environment variables accessible in runtime
+
+  - name: Production Environment Enforces Live Keys
+    given:
+      - Vercel environment variables configured for production
+      - VERCEL_ENV is "production"
+      - DATABASE_URL points to Railway production database
+      - REDIS_URL points to Railway production Redis
+      - STRIPE_API_KEY starts with sk_live_
+      - NEXTAUTH_URL is https://website-checker.com
+      - SENTRY_DSN configured for production project
+    when:
+      - Vercel build runs on main branch push
+      - Environment validation runs during build
+    then:
+      - Build passes strict production validation
+      - Test Stripe keys rejected
+      - Deployment proceeds only if all checks pass
+
+  - name: Missing Required Variable Prevents Startup
+    given:
+      - .env.local file exists
+      - DATABASE_URL is missing
+    when:
+      - Application attempts to start
+      - Environment validation runs
+    then:
+      - Validation fails with clear error message
+      - Application exits with error code 1
+      - Error message indicates missing variable: "DATABASE_URL is required"
+      - No database connections attempted
+
+  - name: Invalid DATABASE_URL Format Rejected
+    given:
+      - DATABASE_URL is "not-a-valid-url"
+      - All other variables present and valid
+    when:
+      - Environment validation runs
+    then:
+      - Validation fails
+      - Error message: "DATABASE_URL must start with postgresql:// or postgres://"
+      - Application does not start
+
+  - name: Production Deployment Blocks Test API Keys
+    given:
+      - Environment is production
+      - STRIPE_API_KEY is sk_test_12345 (test key)
+      - All other variables valid
+    when:
+      - Vercel build runs on main branch
+      - Environment validation runs
+    then:
+      - Validation fails
+      - Build fails with error
+      - Error message: "Production environment requires live Stripe key (sk_live_*)"
+      - Deployment does not proceed (FR-011)
+
+  - name: Environment Variables Not Committed to Git
+    given:
+      - .env.local contains sensitive credentials
+      - Developer attempts to commit
+    when:
+      - git add .
+      - git commit
+    then:
+      - Commit succeeds (no pre-commit check for .env.local)
+      - .env.local remains in .gitignore
+      - File not added to commit
+      - Only .env.example is committed
+
+  - name: Worker Service Accesses Same Environment
+    given:
+      - Railway worker service deployed
+      - Environment variables configured in Railway dashboard
+      - Same DATABASE_URL and REDIS_URL as web application
+    when:
+      - Worker service starts
+      - Environment validation runs
+    then:
+      - Worker validates same schema as web app
+      - Worker connects to same database (FR-008)
+      - Worker connects to Redis for job queue (FR-009)
+
+validation_rules:
+  required_variables:
+    - DATABASE_URL
+    - REDIS_URL
+    - STRIPE_API_KEY
+    - SENTRY_DSN
+    - NEXTAUTH_SECRET
+    - NEXTAUTH_URL
+
+  format_rules:
+    DATABASE_URL:
+      pattern: "^(postgresql|postgres)://"
+      error: "Must be a valid PostgreSQL connection string"
+
+    REDIS_URL:
+      pattern: "^rediss?://"
+      error: "Must be a valid Redis connection string"
+
+    STRIPE_API_KEY:
+      development_pattern: "^sk_test_"
+      production_pattern: "^sk_live_"
+      error: "Must match environment (test for dev/staging, live for production)"
+
+    SENTRY_DSN:
+      pattern: "^https://"
+      error: "Must be a valid Sentry DSN URL"
+
+    NEXTAUTH_SECRET:
+      min_length: 32
+      error: "Must be at least 32 characters for security"
+
+    NEXTAUTH_URL:
+      type: "url"
+      error: "Must be a valid URL"
+
+  environment_specific:
+    production:
+      - STRIPE_API_KEY must start with sk_live_
+      - NEXTAUTH_URL must be production domain
+      - SENTRY_DSN must be production project
+
+    staging:
+      - STRIPE_API_KEY must start with sk_test_
+      - NEXTAUTH_URL must be staging domain
+
+    development:
+      - STRIPE_API_KEY must start with sk_test_
+      - NEXTAUTH_URL can be localhost
+
+test_files:
+  - apps/web/tests/unit/lib/env.test.ts
+  - apps/worker/tests/unit/lib/env.test.ts
+  - packages/config/tests/env.test.ts
+
+implementation_files:
+  - packages/config/src/env.ts
+  - apps/web/src/lib/env.ts
+  - apps/worker/src/lib/env.ts
+  - .env.example
+  - .gitignore

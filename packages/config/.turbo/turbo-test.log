@@ -1,0 +1,55 @@
+
+> @website-checker/config@0.1.0 test /Users/lucasjenner/checker/packages/config
+> vitest run
+
+
+ RUN  v1.6.1 /Users/lucasjenner/checker/packages/config
+
+ ❯ tests/env.test.ts  (8 tests | 8 failed) 101ms
+   ❯ tests/env.test.ts > Environment Validation Contract > Development environment loads successfully
+     → Cannot find module '../src/env'
+Require stack:
+- /Users/lucasjenner/checker/packages/config/tests/env.test.ts
+   ❯ tests/env.test.ts > Environment Validation Contract > Staging environment validates schema
+     → Cannot find module '../src/env'
+Require stack:
+- /Users/lucasjenner/checker/packages/config/tests/env.test.ts
+   ❯ tests/env.test.ts > Environment Validation Contract > Production enforces live Stripe keys
+     → Cannot find module '../src/env'
+Require stack:
+- /Users/lucasjenner/checker/packages/config/tests/env.test.ts
+   ❯ tests/env.test.ts > Environment Validation Contract > Missing variable prevents startup
+     → Cannot find module '../src/env'
+Require stack:
+- /Users/lucasjenner/checker/packages/config/tests/env.test.ts
+   ❯ tests/env.test.ts > Environment Validation Contract > Invalid DATABASE_URL rejected
+     → Cannot find module '../src/env'
+Require stack:
+- /Users/lucasjenner/checker/packages/config/tests/env.test.ts
+   ❯ tests/env.test.ts > Environment Validation Contract > Production blocks test API keys
+     → Cannot find module '../src/env'
+Require stack:
+- /Users/lucasjenner/checker/packages/config/tests/env.test.ts
+   ❯ tests/env.test.ts > Environment Validation Contract > Environment variables not committed
+     → ENOENT: no such file or directory, open '.gitignore'
+   ❯ tests/env.test.ts > Environment Validation Contract > Worker accesses same environment
+     → Cannot find module '../src/env'
+Require stack:
+- /Users/lucasjenner/checker/packages/config/tests/env.test.ts
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/env.test.ts > Environment Validation Contract > Development environment loads successfully
+Error: Cannot find module '../src/env'
+Require stack:
+- /Users/lucasjenner/checker/packages/config/tests/env.test.ts
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ tests/env.test.ts:23:29
+     21|     process.env.NODE_ENV = 'development';
+     22| 
+     23|     const { validateEnv } = require('../src/env');
+       |                             ^
+     24|     expect(() => validateEnv()).not.toThrow();
+     25|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯

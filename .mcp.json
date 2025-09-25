@@ -1,0 +1,45 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    },
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server"
+      ]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:hXcJgQnZXkBQZLTexzVcmAiQibILSpOa@trolley.proxy.rlwy.net:47608/railway"
+      ]
+    },
+    "stripe": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-stripe"
+      ],
+      "env": {
+        "STRIPE_API_KEY": "your_stripe_secret_key_here"
+      }
+    },
+    "redis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-redis",
+        "redis://default:QEcuwBKAlqGqfTybnWPvSAPifzUTDGiY@interchange.proxy.rlwy.net:33477"
+      ]
+    }
+  }
+}

@@ -1,0 +1,7 @@
+
+> @website-checker/worker@0.1.0 test /Users/lucasjenner/checker/apps/worker
+> vitest run
+
+
+ RUN  v1.6.1 /Users/lucasjenner/checker/apps/worker
+

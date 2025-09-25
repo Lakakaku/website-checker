@@ -1,0 +1,237 @@
+# Contract: Code Quality Enforcement
+# Maps to: FR-013, FR-014, FR-015, FR-016
+# Entity: Code Quality Rule
+
+name: Code Quality Gates Contract
+version: 1.0.0
+description: Validates that all code quality checks (formatting, linting, type checking) block commits with any violations
+
+scenarios:
+  - name: Pre-commit Hook Blocks Formatting Violations
+    given:
+      - Developer modifies src/app/page.tsx
+      - File has inconsistent indentation (tabs vs spaces)
+      - Prettier rule violated
+      - Developer runs git commit
+    when:
+      - Husky pre-commit hook executes
+      - lint-staged runs Prettier on changed files
+      - Prettier check fails
+    then:
+      - Commit is blocked (FR-013, FR-016)
+      - Error message shows formatting issues
+      - Suggested fix command displayed: pnpm format
+      - No commit created
+      - Git status shows files still staged
+
+  - name: Pre-commit Hook Blocks Linting Violations
+    given:
+      - Developer modifies src/lib/api.ts
+      - Code uses console.log() (ESLint violation)
+      - @typescript-eslint/no-console rule triggered
+      - Developer runs git commit
+    when:
+      - Husky pre-commit hook executes
+      - lint-staged runs ESLint on changed files
+      - ESLint fails with error-level violations
+    then:
+      - Commit is blocked (FR-015, FR-016)
+      - Error message shows linting issues with line numbers
+      - Suggested fix command displayed: pnpm lint --fix
+      - No commit created
+      - Developer must fix violations before retry
+
+  - name: Pre-commit Hook Blocks Type Errors
+    given:
+      - Developer modifies src/components/Button.tsx
+      - Code has TypeScript error (wrong prop type)
+      - Function expects string, receives number
+      - Developer runs git commit
+    when:
+      - Husky pre-commit hook executes
+      - lint-staged runs TypeScript check
+      - TypeScript compilation fails
+    then:
+      - Commit is blocked (FR-014, FR-016)
+      - Error message shows type mismatch with file and line
+      - No --fix available for type errors
+      - Developer must correct types manually
+      - No commit created until fixed
+
+  - name: All Quality Checks Pass Allows Commit
+    given:
+      - Developer modifies multiple files
+      - All files properly formatted
+      - No linting violations
+      - No type errors
+      - Developer runs git commit
+    when:
+      - Husky pre-commit hook executes
+      - lint-staged runs all checks
+      - Prettier check passes
+      - ESLint check passes
+      - TypeScript check passes
+    then:
+      - All checks succeed
+      - Commit proceeds normally
+      - Commit SHA created
+      - Files move from staged to committed
+
+  - name: Auto-fixable Issues Fixed Automatically
+    given:
+      - Developer modifies src/utils/helpers.ts
+      - File has fixable formatting issues
+      - ESLint has auto-fixable violations
+      - Developer runs git commit
+    when:
+      - Husky pre-commit hook executes
+      - lint-staged runs with --fix flags
+      - Prettier auto-formats code
+      - ESLint auto-fixes violations
+    then:
+      - Files automatically fixed
+      - Fixed files re-staged
+      - Commit proceeds with fixed code
+      - No manual intervention needed
+
+  - name: CI Pipeline Validates Quality on PR
+    given:
+      - Developer pushes feature branch
+      - Opens pull request to develop
+      - GitHub Actions CI configured
+    when:
+      - CI workflow triggers
+      - Runs pnpm lint across entire codebase
+      - Runs pnpm typecheck across entire codebase
+      - Runs pnpm format:check across entire codebase
+    then:
+      - All quality checks run on full codebase (not just changed files)
+      - PR status checks updated
+      - Green checkmark if all pass
+      - Red X if any fail
+      - PR cannot merge if checks fail
+
+  - name: Monorepo Checks Only Affected Workspaces
+    given:
+      - Developer modifies apps/web/src/app/page.tsx only
+      - No changes in apps/worker/
+      - Turborepo configured for affected packages
+    when:
+      - Pre-commit hook runs
+      - lint-staged detects changed files
+    then:
+      - Quality checks run only on apps/web/
+      - apps/worker/ checks skipped
+      - Faster commit process
+      - Still blocks if web app has violations
+
+  - name: Shared Config Enforces Consistent Rules
+    given:
+      - apps/web/ and apps/worker/ both use packages/config/eslint
+      - Same ESLint rules enforced across workspaces
+      - Developer modifies file in apps/worker/
+    when:
+      - ESLint runs on worker code
+    then:
+      - Same rules applied as web app
+      - Consistent code style across monorepo
+      - No workspace-specific rule drift
+
+  - name: TypeScript Strict Mode Prevents Common Errors
+    given:
+      - TypeScript strict mode enabled
+      - Developer writes code with implicit any
+      - Code: function process(data) { return data.value }
+    when:
+      - TypeScript compilation runs
+      - Strict mode checks trigger
+    then:
+      - Error: Parameter 'data' implicitly has an 'any' type
+      - Commit blocked until types added
+      - Developer must add explicit type annotation
+
+  - name: Conventional Commit Messages Enforced
+    given:
+      - Developer runs git commit with message "fixed bug"
+      - Message doesn't follow conventional commits format
+      - commitlint configured in Husky
+    when:
+      - Husky commit-msg hook runs
+      - commitlint validates message format
+    then:
+      - Commit blocked
+      - Error: "Commit message must match format: type(scope): message"
+      - Examples shown: "feat(auth): add login", "fix(api): handle edge case"
+      - Developer must rewrite commit message
+
+validation_rules:
+  formatting_rules:
+    tool: Prettier
+    config: .prettierrc.js
+    enforcement: error
+    auto_fix: true
+    scope: All files (*.ts, *.tsx, *.js, *.json, *.md)
+
+  linting_rules:
+    tool: ESLint
+    configs:
+      - packages/config/eslint/base.js
+      - packages/config/eslint/nextjs.js (web app)
+      - packages/config/eslint/node.js (worker)
+    enforcement: error
+    auto_fix: partial
+    severity_threshold: error (warnings allowed)
+
+  type_checking_rules:
+    tool: TypeScript
+    version: ">=5.0.0"
+    strict_mode: true
+    additional_flags:
+      - noUncheckedIndexedAccess: true
+      - noImplicitOverride: true
+    enforcement: error
+    auto_fix: false
+
+  commit_message_rules:
+    tool: commitlint
+    config: "@commitlint/config-conventional"
+    format: "type(scope): message"
+    allowed_types:
+      - feat
+      - fix
+      - docs
+      - style
+      - refactor
+      - test
+      - chore
+
+  pre_commit_enforcement:
+    - All formatting violations block commit (FR-013)
+    - All linting errors block commit (FR-015)
+    - All type errors block commit (FR-014)
+    - Warnings do not block commit
+    - Auto-fix runs before blocking
+
+  ci_enforcement:
+    - Full codebase checks on PR
+    - No auto-fix in CI (enforce clean commits)
+    - Blocks PR merge if any checks fail
+    - Status checks visible in GitHub UI
+
+test_files:
+  - tests/quality/formatting.test.ts
+  - tests/quality/linting.test.ts
+  - tests/quality/type-check.test.ts
+  - tests/quality/pre-commit.test.ts
+
+implementation_files:
+  - .husky/pre-commit
+  - .husky/commit-msg
+  - packages/config/src/eslint/base.js
+  - packages/config/src/eslint/nextjs.js
+  - packages/config/src/eslint/node.js
+  - .prettierrc.js
+  - .prettierignore
+  - tsconfig.base.json
+  - commitlint.config.js
+  - .github/workflows/ci.yml

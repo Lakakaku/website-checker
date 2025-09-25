@@ -1,0 +1,214 @@
+# Contract: Deployment Pipeline Validation
+# Maps to: FR-010, FR-011, FR-012
+# Entity: Deployment
+
+name: Deployment Pipeline Contract
+version: 1.0.0
+description: Validates automated deployment to Vercel (main and develop branches) with proper environment configuration and status visibility
+
+scenarios:
+  - name: Main Branch Push Triggers Production Deployment
+    given:
+      - Code pushed to main branch
+      - All CI checks pass (lint, type, test)
+      - GitHub Actions workflow configured
+    when:
+      - GitHub webhook fires
+      - Vercel deployment triggered
+      - Environment: production
+    then:
+      - Vercel builds Next.js application
+      - Production environment variables loaded
+      - Build succeeds within 5 minutes
+      - Deployment URL: https://website-checker.com
+      - Status visible in Vercel dashboard (FR-012)
+
+  - name: Develop Branch Push Triggers Staging Deployment
+    given:
+      - Code pushed to develop branch
+      - All CI checks pass
+      - GitHub Actions workflow configured
+    when:
+      - GitHub webhook fires
+      - Vercel deployment triggered
+      - Environment: staging (preview)
+    then:
+      - Vercel builds Next.js application
+      - Staging environment variables loaded
+      - Build succeeds
+      - Deployment URL: https://staging.website-checker.com (or Vercel preview URL)
+      - Status visible in Vercel dashboard
+
+  - name: Feature Branch Push Does Not Trigger Deployment
+    given:
+      - Code pushed to feature/new-feature branch
+      - Branch is not main or develop
+    when:
+      - GitHub webhook fires
+      - GitHub Actions evaluates workflow conditions
+    then:
+      - Vercel deployment NOT triggered (FR-010)
+      - CI checks still run (lint, type, test)
+      - No deployment status created
+      - Developer sees only CI results, not deployment
+
+  - name: Missing Environment Variable Fails Deployment
+    given:
+      - Code pushed to main branch
+      - SENTRY_DSN environment variable missing in Vercel
+      - All other variables configured
+    when:
+      - Vercel deployment starts
+      - Environment validation runs (FR-011)
+    then:
+      - Build fails immediately
+      - Error message: "Missing required environment variable: SENTRY_DSN"
+      - Deployment status: failed
+      - No broken deployment reaches production
+      - Team notified of failure (FR-012)
+
+  - name: Build Failure Prevents Deployment
+    given:
+      - Code pushed to main branch
+      - TypeScript compilation error in code
+      - Environment variables configured correctly
+    when:
+      - Vercel build runs
+      - TypeScript compilation step executes
+    then:
+      - Build fails with TypeScript errors
+      - Deployment status: failed
+      - Current production deployment unchanged
+      - Error logs accessible in Vercel dashboard (FR-012)
+      - No broken code reaches production
+
+  - name: Successful Deployment Shows Status Visibility
+    given:
+      - Code pushed to main branch
+      - All checks pass
+      - Build succeeds
+    when:
+      - Deployment completes
+    then:
+      - Vercel dashboard shows "Ready" status (FR-012)
+      - Deployment duration visible
+      - Commit SHA and message visible
+      - Deployment URL clickable
+      - Build logs accessible
+      - Team can view deployment details
+
+  - name: Railway Worker Deploys Independently
+    given:
+      - Code pushed to main branch
+      - Worker code changed in apps/worker/
+      - Railway service configured
+    when:
+      - GitHub push triggers Railway deployment
+      - Railway builds worker service
+    then:
+      - Worker service deploys to Railway
+      - Environment variables from Railway dashboard loaded
+      - Worker connects to PostgreSQL (FR-008)
+      - Worker connects to Redis (FR-009)
+      - Worker service restarts gracefully
+
+  - name: Deployment Rollback on Critical Error
+    given:
+      - New deployment to production succeeds
+      - Critical runtime error detected within 5 minutes
+      - Sentry alerts team (FR-019)
+    when:
+      - Team decides to rollback
+      - Vercel rollback triggered via CLI or dashboard
+    then:
+      - Previous deployment restored immediately
+      - Rollback completes within 1 minute
+      - No downtime during rollback
+      - Rollback visible in deployment history (FR-012)
+
+  - name: Concurrent Deployments Queued Properly
+    given:
+      - Developer pushes to develop branch
+      - Second developer pushes to develop 30 seconds later
+      - Both trigger deployments
+    when:
+      - Vercel receives both deployment requests
+    then:
+      - First deployment builds immediately
+      - Second deployment queues
+      - Second deployment starts after first completes
+      - Both deployments visible in history (FR-012)
+
+  - name: Deployment Validates Environment Before Build
+    given:
+      - Code pushed to main branch
+      - Production STRIPE_API_KEY is test key (sk_test_)
+    when:
+      - Vercel build starts
+      - Environment validation runs first (FR-011)
+    then:
+      - Validation fails before build starts
+      - Error: "Production requires live Stripe key"
+      - Build does not proceed
+      - Resources saved (no unnecessary build)
+
+validation_rules:
+  deployment_triggers:
+    main_branch:
+      environment: production
+      vercel_production: true
+      preview_deployments: false
+
+    develop_branch:
+      environment: staging
+      vercel_production: false
+      preview_deployments: true
+
+    other_branches:
+      deployment_enabled: false
+      ci_checks_only: true
+
+  environment_validation_gate:
+    - Must run before build starts
+    - Must validate all required variables present (FR-011)
+    - Must validate format/content of variables
+    - Must fail fast if validation fails
+
+  build_requirements:
+    - TypeScript compilation must succeed
+    - ESLint must pass (no errors)
+    - Tests must pass
+    - Environment variables must validate
+    - Build timeout: 10 minutes maximum
+
+  deployment_status_visibility:
+    required_info:
+      - Deployment status (building | deploying | ready | error)
+      - Deployment URL
+      - Commit SHA and message
+      - Deploy duration
+      - Build logs
+      - Triggering user/automation
+
+    access:
+      - Team members can view all deployments
+      - Status updates in real-time
+      - Accessible via Vercel dashboard and CLI
+
+  railway_worker_deployment:
+    trigger: Push to main branch
+    service: worker
+    health_check: Service must connect to database and Redis
+    restart_policy: Always restart on failure
+
+test_files:
+  - .github/workflows/deploy.test.yml (workflow validation)
+  - apps/web/tests/integration/deployment/vercel.test.ts
+  - apps/worker/tests/integration/deployment/railway.test.ts
+
+implementation_files:
+  - .github/workflows/deploy.yml
+  - vercel.json
+  - railway.json
+  - apps/web/package.json (build scripts)
+  - apps/worker/package.json (build scripts)
