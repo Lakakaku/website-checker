@@ -13,5 +13,12 @@
     "allowJs": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "playwright.config.ts", "tests/**/*", "**/*.test.*", "**/*.spec.*"]
+  "exclude": [
+    "node_modules",
+    "playwright.config.ts",
+    "vitest.config.ts",
+    "tests/**/*",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ]
 }
