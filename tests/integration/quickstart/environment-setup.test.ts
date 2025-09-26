@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
-import { validateEnv } from '@website-checker/config/src/env.js';
+import { validateEnv } from '@website-checker/config';
 
 describe('Quickstart Scenario 2: Environment Setup', () => {
   const testEnvPath = join(process.cwd(), '.env.test');

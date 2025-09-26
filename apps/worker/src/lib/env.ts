@@ -1,4 +1,4 @@
-import { validateEnv, type Env } from '@website-checker/config/src/env';
+import { validateEnv, type Env } from '@website-checker/config';
 
 let env: Env | null = null;
 
