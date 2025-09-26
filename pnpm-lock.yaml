@@ -59,6 +59,15 @@ importers:
       '@sentry/nextjs':
         specifier: ^8.13.0
         version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1)(@opentelemetry/core@1.30.1)(@opentelemetry/instrumentation@0.57.2)(@opentelemetry/sdk-trace-base@1.30.1)(next@14.2.5)(react@18.3.1)(webpack@5.101.3)
+      '@types/node':
+        specifier: ^20.14.10
+        version: 20.19.17
+      '@types/react':
+        specifier: ^18.3.24
+        version: 18.3.24
+      '@types/react-dom':
+        specifier: ^18.3.7
+        version: 18.3.7(@types/react@18.3.24)
       '@website-checker/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -83,6 +92,9 @@ importers:
       tailwind-merge:
         specifier: ^2.4.0
         version: 2.6.0
+      typescript:
+        specifier: ^5.5.3
+        version: 5.9.2
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -90,15 +102,6 @@ importers:
       '@playwright/test':
         specifier: ^1.45.0
         version: 1.55.1
-      '@types/node':
-        specifier: ^20.14.10
-        version: 20.19.17
-      '@types/react':
-        specifier: ^18.3.24
-        version: 18.3.24
-      '@types/react-dom':
-        specifier: ^18.3.7
-        version: 18.3.7(@types/react@18.3.24)
       '@website-checker/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -117,9 +120,6 @@ importers:
       tailwindcss:
         specifier: ^3.4.4
         version: 3.4.17
-      typescript:
-        specifier: ^5.5.3
-        version: 5.9.2
       vitest:
         specifier: ^1.6.0
         version: 1.6.1(@types/node@20.19.17)
@@ -2549,7 +2549,7 @@ packages:
 
   /@types/prop-types@15.7.15:
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
-    dev: true
+    dev: false
 
   /@types/react-dom@18.3.7(@types/react@18.3.24):
     resolution: {integrity: sha512-MEe3UeoENYVFXzoXEWsvcpg6ZvlrFNlOQ7EOsvhI3CfAXwzPfO8Qwuxd40nepsYKqyyVQnTdEfv68q91yLcKrQ==}
@@ -2557,14 +2557,14 @@ packages:
       '@types/react': ^18.0.0
     dependencies:
       '@types/react': 18.3.24
-    dev: true
+    dev: false
 
   /@types/react@18.3.24:
     resolution: {integrity: sha512-0dLEBsA1kI3OezMBF8nSsb7Nk19ZnsyE1LLhB8r27KbgU5H4pvuqZLdtE+aUkJVoXgTVuA+iLIwmZ0TuK4tx6A==}
     dependencies:
       '@types/prop-types': 15.7.15
       csstype: 3.1.3
-    dev: true
+    dev: false
 
   /@types/shimmer@1.2.0:
     resolution: {integrity: sha512-UE7oxhQLLd9gub6JKIAhDq06T0F6FnztwMNRvYgjeQSBeMc1ZG/tA47EwfduvkuQS8apbkM/lpLpWsaCeYsXVg==}
@@ -3930,7 +3930,7 @@ packages:
 
   /csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
-    dev: true
+    dev: false
 
   /damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
@@ -8318,7 +8318,6 @@ packages:
     resolution: {integrity: sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: true
 
   /ufo@1.6.1:
     resolution: {integrity: sha512-9a4/uxlTWJ4+a5i0ooc1rU7C7YOw3wT+UGqdeNNHWnOF9qcMBgLRS+4IYUqbczewFx4mLEig6gawh7X6mFlEkA==}
