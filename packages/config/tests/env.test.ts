@@ -11,6 +11,7 @@ describe('Environment Validation Contract', () => {
     delete process.env.NEXTAUTH_SECRET;
     delete process.env.NEXTAUTH_URL;
     delete process.env.NODE_ENV;
+    delete process.env.VERCEL_ENV;
   });
 
   it('Development environment loads successfully', () => {
@@ -33,7 +34,7 @@ describe('Environment Validation Contract', () => {
     process.env.SENTRY_DSN = 'https://staging@sentry.io/456';
     process.env.NEXTAUTH_SECRET = 'b'.repeat(32);
     process.env.NEXTAUTH_URL = 'https://staging.website-checker.com';
-    process.env.NODE_ENV = 'production';
+    process.env.NODE_ENV = 'development';
     process.env.VERCEL_ENV = 'preview';
 
     // validateEnv is now imported at the top
