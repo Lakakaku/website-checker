@@ -12,10 +12,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@prisma/client": "^5.16.0"
+    "@prisma/client": "^5.16.0",
+    "prisma": "^5.16.0"
   },
   "devDependencies": {
-    "prisma": "^5.16.0",
     "typescript": "^5.5.3",
     "vitest": "^1.6.0"
   }
