@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { readFileSync } from 'fs';
+import { validateEnv } from '../src/env.js';
 
 describe('Environment Validation Contract', () => {
   beforeEach(() => {
@@ -20,7 +22,7 @@ describe('Environment Validation Contract', () => {
     process.env.NEXTAUTH_URL = 'http://localhost:3000';
     process.env.NODE_ENV = 'development';
 
-    const { validateEnv } = require('../src/env');
+    // validateEnv is now imported at the top
     expect(() => validateEnv()).not.toThrow();
   });
 
@@ -34,7 +36,7 @@ describe('Environment Validation Contract', () => {
     process.env.NODE_ENV = 'production';
     process.env.VERCEL_ENV = 'preview';
 
-    const { validateEnv } = require('../src/env');
+    // validateEnv is now imported at the top
     expect(() => validateEnv()).not.toThrow();
   });
 
@@ -48,7 +50,7 @@ describe('Environment Validation Contract', () => {
     process.env.NODE_ENV = 'production';
     process.env.VERCEL_ENV = 'production';
 
-    const { validateEnv } = require('../src/env');
+    // validateEnv is now imported at the top
     expect(() => validateEnv()).toThrow(/live Stripe key/);
   });
 
@@ -60,7 +62,7 @@ describe('Environment Validation Contract', () => {
     process.env.NEXTAUTH_URL = 'http://localhost:3000';
     process.env.NODE_ENV = 'development';
 
-    const { validateEnv } = require('../src/env');
+    // validateEnv is now imported at the top
     expect(() => validateEnv()).toThrow(/DATABASE_URL/);
   });
 
@@ -73,7 +75,7 @@ describe('Environment Validation Contract', () => {
     process.env.NEXTAUTH_URL = 'http://localhost:3000';
     process.env.NODE_ENV = 'development';
 
-    const { validateEnv } = require('../src/env');
+    // validateEnv is now imported at the top
     expect(() => validateEnv()).toThrow(/postgresql/);
   });
 
@@ -87,13 +89,12 @@ describe('Environment Validation Contract', () => {
     process.env.NODE_ENV = 'production';
     process.env.VERCEL_ENV = 'production';
 
-    const { validateEnv } = require('../src/env');
+    // validateEnv is now imported at the top
     expect(() => validateEnv()).toThrow(/live/);
   });
 
   it('Environment variables not committed', () => {
-    const fs = require('fs');
-    const gitignoreContent = fs.readFileSync('.gitignore', 'utf-8');
+    const gitignoreContent = readFileSync('../../.gitignore', 'utf-8');
     expect(gitignoreContent).toContain('.env');
     expect(gitignoreContent).toContain('.env*.local');
     expect(gitignoreContent).toContain('!.env.example');
@@ -108,7 +109,7 @@ describe('Environment Validation Contract', () => {
     process.env.NEXTAUTH_URL = 'http://localhost:3000';
     process.env.NODE_ENV = 'development';
 
-    const { validateEnv } = require('../src/env');
+    // validateEnv is now imported at the top
     const webEnv = validateEnv();
     const workerEnv = validateEnv();
 

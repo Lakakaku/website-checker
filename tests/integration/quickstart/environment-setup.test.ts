@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
+import { validateEnv } from '@website-checker/config/src/env.js';
 
 describe('Quickstart Scenario 2: Environment Setup', () => {
   const testEnvPath = join(process.cwd(), '.env.test');
@@ -50,7 +51,6 @@ NODE_ENV=development
     process.env.SENTRY_DSN = 'https://test@sentry.io/123';
     process.env.NODE_ENV = 'development';
 
-    const { validateEnv } = require('@website-checker/config/src/env');
     expect(() => validateEnv()).not.toThrow();
 
     unlinkSync(testEnvPath);
