@@ -1,35 +1,42 @@
 {
   "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"]
+    },
     "playwright": {
       "command": "npx",
       "args": ["@playwright/mcp@latest"]
     },
-    "serena": {
-      "command": "uvx",
-      "args": ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server"]
-    },
     "postgres": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres:hXcJgQnZXkBQZLTexzVcmAiQibILSpOa@trolley.proxy.rlwy.net:47608/railway"
-      ]
-    },
-    "stripe": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-stripe"],
-      "env": {
-        "STRIPE_API_KEY": "your_stripe_secret_key_here"
-      }
+      "args": ["-y", "@henkey/postgres-mcp-server", "--connection-string", "${DATABASE_URL}"]
     },
     "redis": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-redis",
-        "redis://default:QEcuwBKAlqGqfTybnWPvSAPifzUTDGiY@interchange.proxy.rlwy.net:33477"
+        "redis-mcp",
+        "--redis-host",
+        "interchange.proxy.rlwy.net",
+        "--redis-port",
+        "33477"
       ]
+    },
+    "railway": {
+      "command": "npx",
+      "args": ["-y", "@jasontanswe/railway-mcp"],
+      "env": {
+        "RAILWAY_API_TOKEN": "${RAILWAY_API_TOKEN}"
+      }
+    },
+    "vercel": {
+      "command": "npx",
+      "args": ["-y", "@mistertk/vercel-mcp"],
+      "env": {
+        "VERCEL_API_KEY": "iR2em9atNHlk89Qv0IXSvBdE"
+      },
+      "description": "Vercel MCP for deployment and hosting operations"
     }
   }
 }
